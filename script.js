@@ -1,7 +1,10 @@
-let client = mqtt.connect('wss://broker.hivemq.com:8000/mqtt');
+let client = mqtt.connect('wss://1d5b0c37f4834659a0c05736c16b9504.s1.eu.hivemq.cloud:8884/mqtt', {
+  username: "Joao_Matias",
+  password: "Regaautomatica1"
+});
 
 client.on('connect', () => {
-  console.log('Ligado ao broker MQTT');
+  console.log('Ligado ao broker MQTT (HiveMQ Cloud)');
   client.subscribe('irhub/estado');
   atualizar(); // dispara o pedido inicial
 });
@@ -108,5 +111,3 @@ setInterval(() => {
 }, 2000);
 
 atualizar();
-
-//VERSAO PARA GITHUB
