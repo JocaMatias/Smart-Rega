@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Smart Rega</title>
 
-  <!-- Biblioteca MQTT.js para comunicação com HiveMQ -->
+  <!-- Biblioteca MQTT.js -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script defer src="script.js"></script>
 
@@ -105,23 +105,23 @@
 
     <div class="status">
       <p>Modo atual: <strong id="modo">--</strong></p>
-      <button class="circle-btn" onclick="publicarComando('autoOn')">Automático</button>
-      <button class="circle-btn" onclick="publicarComando('autoOff')">Manual</button>
+      <button class="circle-btn" onclick="enviarComando('autoOn')">Automático</button>
+      <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
     </div>
 
     <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
       <div class="gauge" id="ctrl1" style="min-width: 250px;">
         <div class="label">Bomba 1: <span id="b1">--</span></div>
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
-          <button class="big-btn" onclick="publicarComando('ligar1')">Ligar</button>
-          <button class="big-btn" onclick="publicarComando('desligar1')">Desligar</button>
+          <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
+          <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
         </div>
       </div>
       <div class="gauge" id="ctrl2" style="min-width: 250px;">
         <div class="label">Bomba 2: <span id="b2">--</span></div>
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
-          <button class="big-btn" onclick="publicarComando('ligar2')">Ligar</button>
-          <button class="big-btn" onclick="publicarComando('desligar2')">Desligar</button>
+          <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
+          <button class="big-btn" onclick="enviarComando('desligar2')">Desligar</button>
         </div>
       </div>
     </div>
@@ -145,8 +145,3 @@
   </div>
 </body>
 </html>
-
-</body>
-</html>
-
-<!--VERSAO PARA GITHUB -->
