@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Rega</title>
+  <style>
+    /* Estilo mantido como combinámos anteriormente */
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f3f3f3;
+      color: #333;
+    }
+    .container { padding: 2rem; }
+    header { text-align: center; font-weight: bold; font-size: 2rem; margin-bottom: 2rem; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 2rem; }
+    .gauge {
+      text-align: center;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .label { font-size: 1rem; color: #666; margin-top: 0.5rem; }
+    .circle-btn, .big-btn {
+      border: 2px solid #a855f7;
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
+      font-weight: bold;
+      color: #a855f7;
+      background: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .circle-btn:hover, .big-btn:hover {
+      background: #a855f7;
+      color: white;
+    }
+    .status { text-align: center; margin-top: 1rem; }
+    .setpoints {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .setpoints input {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 80px;
+      text-align: center;
+    }
+    .setpoints label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>Sistema de Rega Automática</header>
+
+    <div class="grid">
+      <div class="gauge">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
+          <circle id="circleTemp" cx="50" cy="50" r="40" stroke="#ef4444" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorTemp" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#ef4444">--</text>
+        </svg>
+        <div class="label">Temperatura do Solo</div>
+      </div>
+      <div class="gauge">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
+          <circle id="circleH1" cx="50" cy="50" r="40" stroke="#1e3a8a" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorH1" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#1e3a8a">--</text>
+        </svg>
+        <div class="label">Humidade 1 (<span id="h1s">--</span>)</div>
+      </div>
+      <div class="gauge">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
+          <circle id="circleH2" cx="50" cy="50" r="40" stroke="#0ea5e9" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorH2" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#0ea5e9">--</text>
+        </svg>
+        <div class="label">Humidade 2 (<span id="h2s">--</span>)</div>
+      </div>
+      <div class="gauge">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
+          <circle id="circleLuz" cx="50" cy="50" r="40" stroke="#f59e0b" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorLuz" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#f59e0b">--</text>
+        </svg>
+        <div class="label">Luz (<span id="luzs">--</span>)</div>
+      </div>
+    </div>
+
+    <div class="status">
+      <p>Modo atual: <strong id="modo">--</strong></p>
+      <button class="circle-btn" onclick="publicarComando('autoOn')">Automático</button>
+      <button class="circle-btn" onclick="publicarComando('autoOff')">Manual</button>
+    </div>
+
+    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+      <div class="gauge" id="ctrl1" style="min-width: 250px;">
+        <div class="label">Bomba 1: <span id="b1">--</span></div>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
+          <button class="big-btn" onclick="publicarComando('ligar1')">Ligar</button>
+          <button class="big-btn" onclick="publicarComando('desligar1')">Desligar</button>
+        </div>
+      </div>
+      <div class="gauge" id="ctrl2" style="min-width: 250px;">
+        <div class="label">Bomba 2: <span id="b2">--</span></div>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
+          <button class="big-btn" onclick="publicarComando('ligar2')">Ligar</button>
+          <button class="big-btn" onclick="publicarComando('desligar2')">Desligar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="setpoints">
+      <label>Temperatura Máx. (C°)
+        <input type="number" id="spTemp" step="0.1" onchange="enviarSetpoints()">
+      </label>
+      <label>Humidade Máx. 1
+        <input type="number" id="spHum1" onchange="enviarSetpoints()">
+      </label>
+      <label>Humidade Máx. 2
+        <input type="number" id="spHum2" onchange="enviarSetpoints()">
+      </label>
+      <label>Luminosidade Máx.
+        <input type="number" id="spLuz" onchange="enviarSetpoints()">
+      </label>
+    </div>
+
+    <div id="contadorSetpoint" style="text-align: center; margin-top: 1rem; font-weight: bold;"></div>
+  </div>
+
+  <!-- MQTT.js via CDN -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+
+<!--VERSAO PARA GITHUB -->
