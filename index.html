@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Smart Rega</title>
+
+  <!-- Biblioteca MQTT.js -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script defer src="script.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -13,23 +16,27 @@
       background-color: #f3f3f3;
       color: #333;
     }
+
     .container {
       padding: 1rem;
       max-width: 1000px;
       margin: auto;
     }
+
     header {
       text-align: center;
       font-weight: bold;
       font-size: 2rem;
       margin-bottom: 2rem;
     }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
     }
+
     .gauge {
       text-align: center;
       background: white;
@@ -37,11 +44,13 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     .label {
       font-size: 1rem;
       color: #666;
       margin-top: 0.5rem;
     }
+
     .circle-btn, .big-btn {
       border: 2px solid #a855f7;
       padding: 0.6rem 1.5rem;
@@ -53,42 +62,26 @@
       transition: 0.3s;
       font-size: 1rem;
     }
+
     .circle-btn:hover, .big-btn:hover {
       background: #a855f7;
       color: white;
     }
+
     .status {
       text-align: center;
-      margin: 1rem 0;
-    }
-    .bomba-container {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
       margin-top: 1rem;
+      margin-bottom: 1rem;
     }
-    .bomba-box {
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .bomba-box .label {
-      margin-bottom: 0.5rem;
-    }
-    .bomba-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-    }
+
     .setpoints {
-      margin-top: 2rem;
+      margin-top: 1rem;
       display: flex;
       justify-content: center;
       gap: 1rem;
       flex-wrap: wrap;
     }
+
     .setpoints input {
       padding: 0.5rem;
       border: 1px solid #ccc;
@@ -97,35 +90,53 @@
       text-align: center;
       font-size: 1rem;
     }
+
     .setpoints label {
       display: flex;
       flex-direction: column;
       align-items: center;
       font-size: 0.9rem;
     }
-    #contadorSetpoint {
-      text-align: center;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
+
     @media (max-width: 700px) {
       .grid {
         grid-template-columns: repeat(2, 1fr);
       }
-      .bomba-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
+
+      .container {
+        padding: 0.5rem;
       }
-      .circle-btn {
-        margin-bottom: 0.5rem;
+
+      .gauge {
+        padding: 0.5rem 0;
+        margin: 0 auto 0.5rem auto;
+        width: 100%;
+        background: transparent;
+        box-shadow: none;
       }
+
+      .gauge .label {
+        margin-bottom: 0.3rem;
+      }
+
+      .circle-btn, .big-btn {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .status p {
+        font-size: 1rem;
+      }
+
+      #ctrl1, #ctrl2 {
+        margin-bottom: 0.1rem !important;
+        padding: 0rem !important;
+      }
+
       .setpoints {
         flex-direction: column;
         align-items: center;
-      }
-      .bomba-box .label {
-        margin-bottom: 0.2rem;
+        margin-top: 0.3rem !important;
       }
     }
   </style>
@@ -137,9 +148,9 @@
     <div class="grid">
       <div class="gauge">
         <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none"/>
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
           <circle id="circleTemp" cx="50" cy="50" r="40" stroke="#ef4444" stroke-width="10" fill="none"
-            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
           <text id="valorTemp" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
             fill="#ef4444">--</text>
         </svg>
@@ -147,9 +158,9 @@
       </div>
       <div class="gauge">
         <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none"/>
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
           <circle id="circleH1" cx="50" cy="50" r="40" stroke="#1e3a8a" stroke-width="10" fill="none"
-            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
           <text id="valorH1" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
             fill="#1e3a8a">--</text>
         </svg>
@@ -157,9 +168,9 @@
       </div>
       <div class="gauge">
         <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none"/>
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
           <circle id="circleH2" cx="50" cy="50" r="40" stroke="#0ea5e9" stroke-width="10" fill="none"
-            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
           <text id="valorH2" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
             fill="#0ea5e9">--</text>
         </svg>
@@ -167,9 +178,9 @@
       </div>
       <div class="gauge">
         <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none"/>
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
           <circle id="circleLuz" cx="50" cy="50" r="40" stroke="#f59e0b" stroke-width="10" fill="none"
-            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
           <text id="valorLuz" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
             fill="#f59e0b">--</text>
         </svg>
@@ -183,17 +194,17 @@
       <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
     </div>
 
-    <div class="bomba-container">
-      <div class="bomba-box">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 0rem; margin-top: 0rem;">
+      <div class="gauge" id="ctrl1">
         <div class="label">Bomba 1: <span id="b1">--</span></div>
-        <div class="bomba-buttons">
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0rem;">
           <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
           <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
         </div>
       </div>
-      <div class="bomba-box">
+      <div class="gauge" id="ctrl2">
         <div class="label">Bomba 2: <span id="b2">--</span></div>
-        <div class="bomba-buttons">
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0rem;">
           <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
           <button class="big-btn" onclick="enviarComando('desligar2')">Desligar</button>
         </div>
@@ -215,7 +226,7 @@
       </label>
     </div>
 
-    <div id="contadorSetpoint"></div>
+    <div id="contadorSetpoint" style="text-align: center; margin-top: 1rem; font-weight: bold;"></div>
   </div>
 </body>
 </html>
