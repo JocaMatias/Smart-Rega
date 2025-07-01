@@ -111,3 +111,5 @@ setInterval(() => {
 }, 2000);
 
 atualizar();
+
+//RELATORIO
