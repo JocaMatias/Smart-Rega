@@ -75,7 +75,7 @@
     }
 
     .setpoints {
-      margin-top: 2rem;
+      margin-top: 1rem;
       display: flex;
       justify-content: center;
       gap: 1rem;
@@ -98,19 +98,25 @@
       font-size: 0.9rem;
     }
 
-    #ctrl1, #ctrl2 {
-      min-width: unset;
-      flex: 1 1 300px;
-    }
-
     @media (max-width: 700px) {
       .grid {
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .setpoints {
-        flex-direction: column;
-        align-items: center;
+      .container {
+        padding: 0.5rem;
+      }
+
+      .gauge {
+        padding: 0.5rem 0;
+        margin: 0 auto 0.5rem auto;
+        width: 100%;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .gauge .label {
+        margin-bottom: 0.3rem;
       }
 
       .circle-btn, .big-btn {
@@ -122,22 +128,15 @@
         font-size: 1rem;
       }
 
-      .gauge {
-        padding: 0.5rem 0;
-        margin: 0 auto 0.5rem auto;
-        width: 100%;
-        background: transparent;
-        box-shadow: none;
-      }
-
       #ctrl1, #ctrl2 {
-        display: block;
-        width: 100%;
-        margin-bottom: 1rem;
+        margin-bottom: 0.1rem !important;
+        padding: 0rem !important;
       }
 
-      .container {
-        padding: 0.5rem;
+      .setpoints {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 0.3rem !important;
       }
     }
   </style>
@@ -195,17 +194,17 @@
       <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
     </div>
 
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 2rem;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 0rem; margin-top: 0rem;">
       <div class="gauge" id="ctrl1">
         <div class="label">Bomba 1: <span id="b1">--</span></div>
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0rem;">
           <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
           <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
         </div>
       </div>
       <div class="gauge" id="ctrl2">
         <div class="label">Bomba 2: <span id="b2">--</span></div>
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0rem;">
           <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
           <button class="big-btn" onclick="enviarComando('desligar2')">Desligar</button>
         </div>
