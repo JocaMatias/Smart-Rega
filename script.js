@@ -94,6 +94,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById(id);
     if (input) {
       input.addEventListener("input", iniciarDelayEdicao);
+      input.addEventListener("focus", iniciarDelayEdicao);
     }
   });
 });
