@@ -16,9 +16,27 @@
       background-color: #f3f3f3;
       color: #333;
     }
-    .container { padding: 2rem; }
-    header { text-align: center; font-weight: bold; font-size: 2rem; margin-bottom: 2rem; }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 2rem; }
+
+    .container {
+      padding: 1rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
     .gauge {
       text-align: center;
       background: white;
@@ -26,7 +44,13 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    .label { font-size: 1rem; color: #666; margin-top: 0.5rem; }
+
+    .label {
+      font-size: 1rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+
     .circle-btn, .big-btn {
       border: 2px solid #a855f7;
       padding: 0.6rem 1.5rem;
@@ -36,12 +60,19 @@
       background: white;
       cursor: pointer;
       transition: 0.3s;
+      font-size: 1rem;
     }
+
     .circle-btn:hover, .big-btn:hover {
       background: #a855f7;
       color: white;
     }
-    .status { text-align: center; margin-top: 1rem; }
+
+    .status {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
     .setpoints {
       margin-top: 2rem;
       display: flex;
@@ -49,18 +80,71 @@
       gap: 1.5rem;
       flex-wrap: wrap;
     }
+
     .setpoints input {
       padding: 0.5rem;
       border: 1px solid #ccc;
       border-radius: 5px;
       width: 80px;
       text-align: center;
+      font-size: 1rem;
     }
+
     .setpoints label {
       display: flex;
       flex-direction: column;
       align-items: center;
       font-size: 0.9rem;
+    }
+
+    #ctrl1, #ctrl2 {
+      min-width: 250px;
+    }
+
+    .mobile-dashboard {
+      display: none;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .mobile-dashboard .row {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .mobile-dashboard .row span {
+      margin: 0.3rem 0.6rem;
+      font-weight: bold;
+    }
+
+    @media (max-width: 700px) {
+      .grid, #ctrl1, #ctrl2, .setpoints {
+        display: none;
+      }
+
+      .mobile-dashboard {
+        display: block;
+      }
+
+      .circle-btn, .big-btn {
+        width: 100%;
+        max-width: 250px;
+        margin-bottom: 0.5rem;
+      }
+
+      .status {
+        margin-bottom: 1rem;
+      }
+
+      #contadorSetpoint {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -68,6 +152,34 @@
   <div class="container">
     <header>Sistema de Rega Automática</header>
 
+    <!-- Versão MOBILE -->
+    <div class="mobile-dashboard">
+      <div class="row">
+        <span>🌡️ <span id="valorTemp">--</span>°C</span>
+        <span>💧1 <span id="valorH1">--</span>%</span>
+        <span>💧2 <span id="valorH2">--</span>%</span>
+        <span>☀️ <span id="valorLuz">--</span></span>
+      </div>
+      <div class="status">
+        <p>Modo: <strong id="modo">--</strong></p>
+        <button class="circle-btn" onclick="enviarComando('autoOn')">Automático</button>
+        <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
+      </div>
+      <div class="row">
+        <div>
+          <p>Bomba 1: <strong id="b1">--</strong></p>
+          <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
+          <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
+        </div>
+        <div>
+          <p>Bomba 2: <strong id="b2">--</strong></p>
+          <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
+          <button class="big-btn" onclick="enviarComando('desligar2')">Desligar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Versão DESKTOP -->
     <div class="grid">
       <div class="gauge">
         <svg width="100" height="100">
@@ -110,14 +222,14 @@
     </div>
 
     <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
-      <div class="gauge" id="ctrl1" style="min-width: 250px;">
+      <div class="gauge" id="ctrl1">
         <div class="label">Bomba 1: <span id="b1">--</span></div>
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
           <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
           <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
         </div>
       </div>
-      <div class="gauge" id="ctrl2" style="min-width: 250px;">
+      <div class="gauge" id="ctrl2">
         <div class="label">Bomba 2: <span id="b2">--</span></div>
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
           <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
@@ -141,7 +253,4 @@
       </label>
     </div>
 
-    <div id="contadorSetpoint" style="text-align: center; margin-top: 1rem; font-weight: bold;"></div>
-  </div>
-</body>
-</html>
+    <div id="contadorSetpoin
