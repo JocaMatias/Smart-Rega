@@ -14,7 +14,7 @@
       font-family: sans-serif;
       background-color: #f3f3f3;
       color: #333;
-      overflow-x: hidden; /* ⬅️ evita scroll horizontal */
+      overflow-x: hidden;
     }
 
     .container { padding: 2rem; }
@@ -160,6 +160,10 @@
       <p>Modo atual: <strong id="modo">--</strong></p>
       <button class="circle-btn" onclick="enviarComando('autoOn')">Automático</button>
       <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
+    </div>
+
+    <div id="estadoBombasAuto" style="display: none; text-align: center; margin-top: 1rem; font-size: 1.1rem;">
+      <p>Bomba 1: <strong id="estadoB1Auto">--</strong> &nbsp;&nbsp;|&nbsp;&nbsp; Bomba 2: <strong id="estadoB2Auto">--</strong></p>
     </div>
 
     <div class="bombas-container">
