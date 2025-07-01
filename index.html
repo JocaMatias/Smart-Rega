@@ -57,17 +57,19 @@
       color: white;
     }
 
-    .status { text-align: center; margin-top: 1rem; }
-
-    .estado-bombas-auto {
+    .status {
       text-align: center;
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
-      color: #444;
+      margin-top: 1rem;
+    }
+
+    .bombas-status-auto {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 1rem;
     }
 
     .setpoints {
-      margin-top: 2rem;
+      margin-top: 2.5rem;
       display: flex;
       justify-content: center;
       gap: 1.5rem;
@@ -169,9 +171,8 @@
       <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
     </div>
 
-    <div class="estado-bombas-auto">
-      <span>Bomba 1: <strong id="b1">--</strong></span> |
-      <span>Bomba 2: <strong id="b2">--</strong></span>
+    <div class="bombas-status-auto" id="estadoBombasAuto" style="display: none;">
+      Bomba 1: <strong id="b1Auto">--</strong> | Bomba 2: <strong id="b2Auto">--</strong>
     </div>
 
     <div class="bombas-container">
