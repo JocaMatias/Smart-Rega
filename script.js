@@ -1,212 +1,125 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart Rega</title>
+// Ligação ao broker MQTT via WebSocket seguro (HiveMQ Cloud)
+let client = mqtt.connect('wss://1d5b0c37f4834659a0c05736c16b9504.s1.eu.hivemq.cloud:8884/mqtt', {
+  username: "Joao_Matias",
+  password: "Regaautomatica1"
+});
 
-  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  <script defer src="script.js"></script>
+client.on('connect', () => {
+  console.log('Ligado ao broker MQTT (HiveMQ Cloud)');
+  client.subscribe('irhub/estado');
+  atualizar(); // dispara o pedido inicial
+});
 
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: #f3f3f3;
-      color: #333;
-      overflow-x: hidden;
+client.on('message', (topic, message) => {
+  if (topic === 'irhub/estado') {
+    const d = JSON.parse(message.toString());
+
+    document.getElementById('modo').innerText = d.modo;
+
+    document.getElementById('h1s').innerText = d.h1s;
+    document.getElementById('h2s').innerText = d.h2s;
+    document.getElementById('luzs').innerText = d.luzs;
+
+    document.getElementById('b1').innerText = d.b1 ? 'Ligada' : 'Desligada';
+    document.getElementById('b2').innerText = d.b2 ? 'Ligada' : 'Desligada';
+
+    document.getElementById('ctrl1').style.display = d.modo === 'Manual' ? 'block' : 'none';
+    document.getElementById('ctrl2').style.display = d.modo === 'Manual' ? 'block' : 'none';
+
+    atualizarGauge("circleTemp", "valorTemp", d.temp, "°C", 40);
+    atualizarGauge("circleH1", "valorH1", d.h1, "%");
+    atualizarGauge("circleH2", "valorH2", d.h2, "%");
+    atualizarGauge("circleLuz", "valorLuz", d.luz, "%");
+
+    // ⛔️ Impede atualização dos inputs se estiver a editar
+    if (!bloquearAtualizacao) {
+      document.getElementById('spTemp').value = d.setTempMin;
+      document.getElementById('spHum1').value = d.setHumMin1;
+      document.getElementById('spHum2').value = d.setHumMin2;
+      document.getElementById('spLuz').value = d.setLuzMin;
     }
+  }
+});
 
-    .container { padding: 2rem; }
-    header { text-align: center; font-weight: bold; font-size: 2rem; margin-bottom: 2rem; }
+// Funções de controlo manual
+function enviarComando(cmd) {
+  client.publish('irhub/comando', cmd);
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-      margin-bottom: 2rem;
+function modoAuto() { enviarComando('autoOn'); }
+function modoManual() { enviarComando('autoOff'); }
+function ligar1() { enviarComando('ligar1'); }
+function desligar1() { enviarComando('desligar1'); }
+function ligar2() { enviarComando('ligar2'); }
+function desligar2() { enviarComando('desligar2'); }
+
+// Enviar novos setpoints
+function enviarSetpoints() {
+  const dados = {
+    tempMin: parseFloat(document.getElementById('spTemp').value),
+    humMin1: parseInt(document.getElementById('spHum1').value),
+    humMin2: parseInt(document.getElementById('spHum2').value),
+    luzMin: parseInt(document.getElementById('spLuz').value)
+  };
+
+  client.publish('irhub/setpoints', JSON.stringify(dados));
+  iniciarDelayEdicao();
+}
+
+// Pedir estado atual
+function atualizar() {
+  client.publish('irhub/comando', 'getEstado');
+}
+
+// Atualização visual dos gauges
+function atualizarGauge(circleId, textId, valor, unidade = "%", max = 100) {
+  const dash = Math.round((valor / max) * 251);
+  document.getElementById(circleId).setAttribute("stroke-dasharray", `${dash} ${251 - dash}`);
+  document.getElementById(textId).textContent = valor + unidade;
+}
+
+// ⏳ Bloqueio de atualização durante edição
+let bloquearAtualizacao = false;
+let timeoutAtualizacao = null;
+let segundosRestantes = 0;
+
+function iniciarDelayEdicao() {
+  bloquearAtualizacao = true;
+  clearInterval(timeoutAtualizacao);
+  segundosRestantes = 10;
+  atualizarContador();
+
+  timeoutAtualizacao = setInterval(() => {
+    segundosRestantes--;
+    atualizarContador();
+    if (segundosRestantes <= 0) {
+      bloquearAtualizacao = false;
+      clearInterval(timeoutAtualizacao);
+      document.getElementById('contadorSetpoint').textContent = "";
     }
+  }, 1000);
+}
 
-    .gauge {
-      text-align: center;
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+function atualizarContador() {
+  document.getElementById('contadorSetpoint').textContent =
+    `Setpoint a atualizar em: ${segundosRestantes}s`;
+}
 
-    .label {
-      font-size: 1rem;
-      color: #666;
-      margin-top: 0.5rem;
-    }
+// Início do bloqueio ao tocar nos inputs
+["spTemp", "spHum1", "spHum2", "spLuz"].forEach(id => {
+  const input = document.getElementById(id);
+  if (input) {
+    input.addEventListener("focus", iniciarDelayEdicao);
+    input.addEventListener("input", iniciarDelayEdicao);
+  }
+});
 
-    .circle-btn, .big-btn {
-      border: 2px solid #a855f7;
-      padding: 0.6rem 1.5rem;
-      border-radius: 30px;
-      font-weight: bold;
-      color: #a855f7;
-      background: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+// Atualização automática a cada 2s (se permitido)
+setInterval(() => {
+  if (!bloquearAtualizacao) atualizar();
+}, 2000);
 
-    .circle-btn:hover, .big-btn:hover {
-      background: #a855f7;
-      color: white;
-    }
+// Pedido inicial
+atualizar();
 
-    .status { text-align: center; margin-top: 1rem; }
-
-    .estado-bombas-auto {
-      text-align: center;
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
-      color: #444;
-    }
-
-    .setpoints {
-      margin-top: 2rem;
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .setpoints input {
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      width: 80px;
-      text-align: center;
-    }
-
-    .setpoints label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-size: 0.9rem;
-    }
-
-    .bombas-container {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .bombas-container {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .gauge {
-        width: 90%;
-        max-width: 300px;
-      }
-
-      .setpoints {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .setpoints label {
-        width: 100%;
-        max-width: 200px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>Sistema de Rega Automática</header>
-
-    <div class="grid">
-      <div class="gauge">
-        <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleTemp" cx="50" cy="50" r="40" stroke="#ef4444" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorTemp" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#ef4444">--</text>
-        </svg>
-        <div class="label">Temperatura do Solo</div>
-      </div>
-      <div class="gauge">
-        <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleH1" cx="50" cy="50" r="40" stroke="#1e3a8a" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorH1" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#1e3a8a">--</text>
-        </svg>
-        <div class="label">Humidade 1 (<span id="h1s">--</span>)</div>
-      </div>
-      <div class="gauge">
-        <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleH2" cx="50" cy="50" r="40" stroke="#0ea5e9" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorH2" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#0ea5e9">--</text>
-        </svg>
-        <div class="label">Humidade 2 (<span id="h2s">--</span>)</div>
-      </div>
-      <div class="gauge">
-        <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleLuz" cx="50" cy="50" r="40" stroke="#f59e0b" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorLuz" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#f59e0b">--</text>
-        </svg>
-        <div class="label">Luz (<span id="luzs">--</span>)</div>
-      </div>
-    </div>
-
-    <div class="status">
-      <p>Modo atual: <strong id="modo">--</strong></p>
-      <button class="circle-btn" onclick="enviarComando('autoOn')">Automático</button>
-      <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
-    </div>
-
-    <div class="estado-bombas-auto">
-      <span>Bomba 1: <strong id="b1">--</strong></span> |
-      <span>Bomba 2: <strong id="b2">--</strong></span>
-    </div>
-
-    <div class="bombas-container">
-      <div class="gauge" id="ctrl1" style="min-width: 250px;">
-        <div class="label">Bomba 1: <span id="b1">--</span></div>
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
-          <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
-          <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
-        </div>
-      </div>
-      <div class="gauge" id="ctrl2" style="min-width: 250px;">
-        <div class="label">Bomba 2: <span id="b2">--</span></div>
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
-          <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
-          <button class="big-btn" onclick="enviarComando('desligar2')">Desligar</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="setpoints">
-      <label>Temperatura Máx. (C°)
-        <input type="number" id="spTemp" step="0.1" onchange="enviarSetpoints()">
-      </label>
-      <label>Humidade Máx. 1
-        <input type="number" id="spHum1" onchange="enviarSetpoints()">
-      </label>
-      <label>Humidade Máx. 2
-        <input type="number" id="spHum2" onchange="enviarSetpoints()">
-      </label>
-      <label>Luminosidade Máx.
-        <input type="number" id="spLuz" onchange="enviarSetpoints()">
-      </label>
-    </div>
-
-    <div id="contadorSetpoint" style="text-align: center; margin-top: 1rem; font-weight: bold;"></div>
-  </div>
-</body>
-</html>
+//RELATORIO
