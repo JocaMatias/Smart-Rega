@@ -99,6 +99,7 @@
     }
 
     #ctrl1, #ctrl2 {
+      min-width: unset;
       flex: 1 1 300px;
     }
 
@@ -122,10 +123,11 @@
       }
 
       .gauge {
-        padding: 0.8rem;
-        margin: 0 auto 1rem auto;
+        padding: 0.5rem 0;
+        margin: 0 auto 0.5rem auto;
         width: 100%;
-        box-sizing: border-box;
+        background: transparent;
+        box-shadow: none;
       }
 
       #ctrl1, #ctrl2 {
@@ -153,79 +155,3 @@
           <text id="valorTemp" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
             fill="#ef4444">--</text>
         </svg>
-        <div class="label">Temperatura do Solo</div>
-      </div>
-      <div class="gauge">
-        <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleH1" cx="50" cy="50" r="40" stroke="#1e3a8a" stroke-width="10" fill="none"
-            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorH1" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
-            fill="#1e3a8a">--</text>
-        </svg>
-        <div class="label">Humidade 1 (<span id="h1s">--</span>)</div>
-      </div>
-      <div class="gauge">
-        <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleH2" cx="50" cy="50" r="40" stroke="#0ea5e9" stroke-width="10" fill="none"
-            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorH2" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
-            fill="#0ea5e9">--</text>
-        </svg>
-        <div class="label">Humidade 2 (<span id="h2s">--</span>)</div>
-      </div>
-      <div class="gauge">
-        <svg width="100" height="100">
-          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleLuz" cx="50" cy="50" r="40" stroke="#f59e0b" stroke-width="10" fill="none"
-            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorLuz" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
-            fill="#f59e0b">--</text>
-        </svg>
-        <div class="label">Luz (<span id="luzs">--</span>)</div>
-      </div>
-    </div>
-
-    <div class="status">
-      <p>Modo atual: <strong id="modo">--</strong></p>
-      <button class="circle-btn" onclick="enviarComando('autoOn')">Automático</button>
-      <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
-    </div>
-
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 2rem;">
-      <div class="gauge" id="ctrl1">
-        <div class="label">Bomba 1: <span id="b1">--</span></div>
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
-          <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
-          <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
-        </div>
-      </div>
-      <div class="gauge" id="ctrl2">
-        <div class="label">Bomba 2: <span id="b2">--</span></div>
-        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
-          <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
-          <button class="big-btn" onclick="enviarComando('desligar2')">Desligar</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="setpoints">
-      <label>Temperatura Máx. (C°)
-        <input type="number" id="spTemp" step="0.1" onchange="enviarSetpoints()">
-      </label>
-      <label>Humidade Máx. 1
-        <input type="number" id="spHum1" onchange="enviarSetpoints()">
-      </label>
-      <label>Humidade Máx. 2
-        <input type="number" id="spHum2" onchange="enviarSetpoints()">
-      </label>
-      <label>Luminosidade Máx.
-        <input type="number" id="spLuz" onchange="enviarSetpoints()">
-      </label>
-    </div>
-
-    <div id="contadorSetpoint" style="text-align: center; margin-top: 1rem; font-weight: bold;"></div>
-  </div>
-</body>
-</html>
