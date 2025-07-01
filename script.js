@@ -23,6 +23,11 @@ client.on('message', (topic, message) => {
     document.getElementById('b1').innerText = d.b1 ? 'Ligada' : 'Desligada';
     document.getElementById('b2').innerText = d.b2 ? 'Ligada' : 'Desligada';
 
+    // ✅ Mostrar estado das bombas no modo automático
+    document.getElementById('estadoB1Auto').innerText = d.b1 ? 'Ligada' : 'Desligada';
+    document.getElementById('estadoB2Auto').innerText = d.b2 ? 'Ligada' : 'Desligada';
+    document.getElementById('estadoBombasAuto').style.display = d.modo === 'Automático' ? 'block' : 'none';
+
     document.getElementById('ctrl1').style.display = d.modo === 'Manual' ? 'block' : 'none';
     document.getElementById('ctrl2').style.display = d.modo === 'Manual' ? 'block' : 'none';
 
@@ -121,5 +126,3 @@ setInterval(() => {
 
 // Pedido inicial
 atualizar();
-
-//RELATORIO
