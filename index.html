@@ -14,7 +14,7 @@
       font-family: sans-serif;
       background-color: #f3f3f3;
       color: #333;
-      overflow-x: hidden; /* ⬅️ evita scroll horizontal */
+      overflow-x: hidden;
     }
 
     .container { padding: 2rem; }
@@ -58,6 +58,13 @@
     }
 
     .status { text-align: center; margin-top: 1rem; }
+
+    .estado-bombas-auto {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #444;
+    }
 
     .setpoints {
       margin-top: 2rem;
@@ -160,6 +167,11 @@
       <p>Modo atual: <strong id="modo">--</strong></p>
       <button class="circle-btn" onclick="enviarComando('autoOn')">Automático</button>
       <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
+    </div>
+
+    <div class="estado-bombas-auto">
+      <span>Bomba 1: <strong id="b1">--</strong></span> |
+      <span>Bomba 2: <strong id="b2">--</strong></span>
     </div>
 
     <div class="bombas-container">
