@@ -32,7 +32,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
     }
@@ -71,13 +71,14 @@
     .status {
       text-align: center;
       margin-top: 1rem;
+      margin-bottom: 1rem;
     }
 
     .setpoints {
       margin-top: 2rem;
       display: flex;
       justify-content: center;
-      gap: 1.5rem;
+      gap: 1rem;
       flex-wrap: wrap;
     }
 
@@ -98,52 +99,41 @@
     }
 
     #ctrl1, #ctrl2 {
-      min-width: 250px;
-    }
-
-    .mobile-dashboard {
-      display: none;
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
-    }
-
-    .mobile-dashboard .row {
-      display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-    }
-
-    .mobile-dashboard .row span {
-      margin: 0.3rem 0.6rem;
-      font-weight: bold;
+      min-width: unset;
+      flex: 1 1 300px;
     }
 
     @media (max-width: 700px) {
-      .grid, #ctrl1, #ctrl2, .setpoints {
-        display: none;
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      .mobile-dashboard {
-        display: block;
+      .setpoints {
+        flex-direction: column;
+        align-items: center;
       }
 
       .circle-btn, .big-btn {
         width: 100%;
-        max-width: 250px;
-        margin-bottom: 0.5rem;
+        max-width: 300px;
       }
 
-      .status {
+      .status p {
+        font-size: 1rem;
+      }
+
+      .gauge {
+        padding: 0.8rem;
+      }
+
+      #ctrl1, #ctrl2 {
+        display: block;
+        width: 100%;
         margin-bottom: 1rem;
       }
 
-      #contadorSetpoint {
-        font-size: 0.9rem;
+      .container {
+        padding: 0.5rem;
       }
     }
   </style>
@@ -152,64 +142,44 @@
   <div class="container">
     <header>Sistema de Rega Automática</header>
 
-    <!-- Versão MOBILE -->
-    <div class="mobile-dashboard">
-      <div class="row">
-        <span>🌡️ <span id="valorTemp">--</span>°C</span>
-        <span>💧1 <span id="valorH1">--</span>%</span>
-        <span>💧2 <span id="valorH2">--</span>%</span>
-        <span>☀️ <span id="valorLuz">--</span></span>
-      </div>
-      <div class="status">
-        <p>Modo: <strong id="modo">--</strong></p>
-        <button class="circle-btn" onclick="enviarComando('autoOn')">Automático</button>
-        <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
-      </div>
-      <div class="row">
-        <div>
-          <p>Bomba 1: <strong id="b1">--</strong></p>
-          <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
-          <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
-        </div>
-        <div>
-          <p>Bomba 2: <strong id="b2">--</strong></p>
-          <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
-          <button class="big-btn" onclick="enviarComando('desligar2')">Desligar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Versão DESKTOP -->
     <div class="grid">
       <div class="gauge">
         <svg width="100" height="100">
           <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleTemp" cx="50" cy="50" r="40" stroke="#ef4444" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorTemp" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#ef4444">--</text>
+          <circle id="circleTemp" cx="50" cy="50" r="40" stroke="#ef4444" stroke-width="10" fill="none"
+            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorTemp" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
+            fill="#ef4444">--</text>
         </svg>
         <div class="label">Temperatura do Solo</div>
       </div>
       <div class="gauge">
         <svg width="100" height="100">
           <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleH1" cx="50" cy="50" r="40" stroke="#1e3a8a" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorH1" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#1e3a8a">--</text>
+          <circle id="circleH1" cx="50" cy="50" r="40" stroke="#1e3a8a" stroke-width="10" fill="none"
+            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorH1" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
+            fill="#1e3a8a">--</text>
         </svg>
         <div class="label">Humidade 1 (<span id="h1s">--</span>)</div>
       </div>
       <div class="gauge">
         <svg width="100" height="100">
           <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleH2" cx="50" cy="50" r="40" stroke="#0ea5e9" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorH2" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#0ea5e9">--</text>
+          <circle id="circleH2" cx="50" cy="50" r="40" stroke="#0ea5e9" stroke-width="10" fill="none"
+            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorH2" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
+            fill="#0ea5e9">--</text>
         </svg>
         <div class="label">Humidade 2 (<span id="h2s">--</span>)</div>
       </div>
       <div class="gauge">
         <svg width="100" height="100">
           <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
-          <circle id="circleLuz" cx="50" cy="50" r="40" stroke="#f59e0b" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <text id="valorLuz" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#f59e0b">--</text>
+          <circle id="circleLuz" cx="50" cy="50" r="40" stroke="#f59e0b" stroke-width="10" fill="none"
+            stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorLuz" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16"
+            fill="#f59e0b">--</text>
         </svg>
         <div class="label">Luz (<span id="luzs">--</span>)</div>
       </div>
@@ -221,7 +191,7 @@
       <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
     </div>
 
-    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 2rem;">
       <div class="gauge" id="ctrl1">
         <div class="label">Bomba 1: <span id="b1">--</span></div>
         <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
@@ -253,4 +223,7 @@
       </label>
     </div>
 
-    <div id="contadorSetpoin
+    <div id="contadorSetpoint" style="text-align: center; margin-top: 1rem; font-weight: bold;"></div>
+  </div>
+</body>
+</html>
