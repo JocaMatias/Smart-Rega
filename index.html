@@ -131,6 +131,14 @@
       background-color: #9333ea;
     }
 
+    #avisoOffline {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      padding: 10px 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+
     @media (max-width: 768px) {
       .grid {
         grid-template-columns: repeat(2, 1fr);
@@ -164,6 +172,10 @@
   </style>
 </head>
 <body>
+  <div id="avisoOffline" style="display: none;">
+    Dispositivo offline. <a href="http://192.168.4.1" style="color: #b91c1c; text-decoration: underline;">Clica aqui para aceder ao modo de configuração</a>
+  </div>
+
   <div class="container">
     <header>Sistema de Rega Automática</header>
 
