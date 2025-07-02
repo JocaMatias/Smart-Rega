@@ -1,7 +1,262 @@
 <!DOCTYPE html>
-<html>
-<head><title>Teste</title></head>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Rega</title>
+
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script defer src="script.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f3f3f3;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    .container { padding: 2rem; }
+    header { text-align: center; font-weight: bold; font-size: 2rem; margin-bottom: 2rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .gauge {
+      text-align: center;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .label {
+      font-size: 1rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+
+    .circle-btn, .big-btn {
+      border: 2px solid #a855f7;
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
+      font-weight: bold;
+      color: #a855f7;
+      background: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .circle-btn:hover, .big-btn:hover {
+      background: #a855f7;
+      color: white;
+    }
+
+    .status { text-align: center; margin-top: 1rem; }
+
+    .setpoints {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .setpoints input {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 80px;
+      text-align: center;
+    }
+
+    .setpoints label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .bombas-container {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    #estadoBombasAuto {
+      display: none;
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 1rem;
+      background: white;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 0 6px rgba(0,0,0,0.08);
+    }
+
+    #contadorSetpoint {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-weight: bold;
+    }
+
+    .fab-wifi {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #a855f7;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      transition: background 0.3s;
+    }
+
+    .fab-wifi:hover {
+      background-color: #9333ea;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bombas-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .gauge {
+        width: 90%;
+        max-width: 300px;
+      }
+
+      .setpoints {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .setpoints label {
+        width: 100%;
+        max-width: 200px;
+      }
+
+      #estadoBombasAuto {
+        font-size: 1rem;
+        width: 90%;
+      }
+    }
+  </style>
+</head>
 <body>
-  <h1>Olá Smart Rega</h1>
+  <div class="container">
+    <header>Sistema de Rega Automática</header>
+
+    <div class="grid">
+      <!-- 4 gauges -->
+      <!-- Temperatura -->
+      <div class="gauge">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
+          <circle id="circleTemp" cx="50" cy="50" r="40" stroke="#ef4444" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorTemp" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#ef4444">--</text>
+        </svg>
+        <div class="label">Temperatura do Solo</div>
+      </div>
+
+      <!-- Humidade 1 -->
+      <div class="gauge">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
+          <circle id="circleH1" cx="50" cy="50" r="40" stroke="#1e3a8a" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorH1" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#1e3a8a">--</text>
+        </svg>
+        <div class="label">Humidade 1 (<span id="h1s">--</span>)</div>
+      </div>
+
+      <!-- Humidade 2 -->
+      <div class="gauge">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
+          <circle id="circleH2" cx="50" cy="50" r="40" stroke="#0ea5e9" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorH2" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#0ea5e9">--</text>
+        </svg>
+        <div class="label">Humidade 2 (<span id="h2s">--</span>)</div>
+      </div>
+
+      <!-- Luz -->
+      <div class="gauge">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
+          <circle id="circleLuz" cx="50" cy="50" r="40" stroke="#f59e0b" stroke-width="10" fill="none" stroke-dasharray="0 251" stroke-linecap="round" transform="rotate(-90 50 50)" />
+          <text id="valorLuz" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#f59e0b">--</text>
+        </svg>
+        <div class="label">Luz (<span id="luzs">--</span>)</div>
+      </div>
+    </div>
+
+    <div class="status">
+      <p>Modo atual: <strong id="modo">--</strong></p>
+      <button class="circle-btn" onclick="enviarComando('autoOn')">Automático</button>
+      <button class="circle-btn" onclick="enviarComando('autoOff')">Manual</button>
+    </div>
+
+    <div id="estadoBombasAuto">
+      <p>Bomba 1: <span id="estadoB1Auto">--</span></p>
+      <p>Bomba 2: <span id="estadoB2Auto">--</span></p>
+    </div>
+
+    <div class="bombas-container">
+      <div class="gauge" id="ctrl1" style="min-width: 250px;">
+        <div class="label">Bomba 1: <span id="b1">--</span></div>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
+          <button class="big-btn" onclick="enviarComando('ligar1')">Ligar</button>
+          <button class="big-btn" onclick="enviarComando('desligar1')">Desligar</button>
+        </div>
+      </div>
+      <div class="gauge" id="ctrl2" style="min-width: 250px;">
+        <div class="label">Bomba 2: <span id="b2">--</span></div>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem;">
+          <button class="big-btn" onclick="enviarComando('ligar2')">Ligar</button>
+          <button class="big-btn" onclick="enviarComando('desligar2')">Desligar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="setpoints">
+      <label>Temperatura Máx. (C°)
+        <input type="number" id="spTemp" step="0.1" onchange="enviarSetpoints()">
+      </label>
+      <label>Humidade Máx. 1
+        <input type="number" id="spHum1" onchange="enviarSetpoints()">
+      </label>
+      <label>Humidade Máx. 2
+        <input type="number" id="spHum2" onchange="enviarSetpoints()">
+      </label>
+      <label>Luminosidade Máx.
+        <input type="number" id="spLuz" onchange="enviarSetpoints()">
+      </label>
+    </div>
+
+    <div id="contadorSetpoint"></div>
+  </div>
+
+  <!-- Botão flutuante de Wi-Fi -->
+  <button class="fab-wifi" title="Gerir Wi-Fi" onclick="location.href='/wifi.html'">📶</button>
 </body>
 </html>
