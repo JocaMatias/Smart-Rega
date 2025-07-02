@@ -1,51 +1,24 @@
-// 🛜 Verificação do estado do ESP32 via MQTT
-let conectadoMQTT = false;
-
 // Ligação ao broker MQTT via WebSocket seguro (HiveMQ Cloud)
 let client = mqtt.connect('wss://1d5b0c37f4834659a0c05736c16b9504.s1.eu.hivemq.cloud:8884/mqtt', {
   username: "Joao_Matias",
   password: "Regaautomatica1"
 });
 
-// Verificação se está online após 3 segundos
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    if (!conectadoMQTT) {
-      const aviso = document.createElement('div');
-      aviso.innerHTML = `
-        <div style="
-          background: #fee2e2;
-          color: #991b1b;
-          padding: 1rem;
-          border-radius: 8px;
-          text-align: center;
-          margin: 1rem;
-          font-weight: bold;
-          box-shadow: 0 0 6px rgba(0,0,0,0.1);
-        ">
-          ⚠️ Dispositivo offline.<br/>
-          Liga-te à rede <strong>SmartRega_Config</strong> no Wi-Fi.<br/>
-          <a href="http://192.168.4.1" style="color: #b91c1c; text-decoration: underline;">Clica aqui para configurar</a>.
-        </div>
-      `;
-      document.body.prepend(aviso);
-    }
-  }, 3000);
-});
+let recebeuMensagem = false;
 
 client.on('connect', () => {
   console.log('Ligado ao broker MQTT (HiveMQ Cloud)');
-  conectadoMQTT = true;
   client.subscribe('irhub/estado');
   atualizar(); // dispara o pedido inicial
 });
 
 client.on('message', (topic, message) => {
   if (topic === 'irhub/estado') {
+    recebeuMensagem = true;
+
     const d = JSON.parse(message.toString());
 
     document.getElementById('modo').innerText = d.modo;
-
     document.getElementById('h1s').innerText = d.h1s;
     document.getElementById('h2s').innerText = d.h2s;
     document.getElementById('luzs').innerText = d.luzs;
@@ -74,7 +47,32 @@ client.on('message', (topic, message) => {
   }
 });
 
-// Funções de controlo manual
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if (!recebeuMensagem) {
+      const aviso = document.createElement('div');
+      aviso.innerHTML = `
+        <div style="
+          background: #fee2e2;
+          color: #991b1b;
+          padding: 1rem;
+          border-radius: 8px;
+          text-align: center;
+          margin: 1rem;
+          font-weight: bold;
+          box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        ">
+          ⚠️ Dispositivo offline.<br/>
+          Liga-te à rede <strong>SmartRega_Config</strong> no Wi-Fi.<br/>
+          <a href="http://192.168.4.1" style="color: #b91c1c; text-decoration: underline;">Clica aqui para configurar</a>.
+        </div>
+      `;
+      document.body.prepend(aviso);
+    }
+  }, 3000);
+});
+
+// === CONTROLOS E GAUGES ===
 function enviarComando(cmd) {
   client.publish('irhub/comando', cmd);
 }
@@ -86,7 +84,6 @@ function desligar1() { enviarComando('desligar1'); }
 function ligar2() { enviarComando('ligar2'); }
 function desligar2() { enviarComando('desligar2'); }
 
-// Enviar novos setpoints
 function enviarSetpoints() {
   const dados = {
     tempMin: parseFloat(document.getElementById('spTemp').value),
@@ -99,19 +96,16 @@ function enviarSetpoints() {
   iniciarDelayEdicao();
 }
 
-// Pedir estado atual
 function atualizar() {
   client.publish('irhub/comando', 'getEstado');
 }
 
-// Atualização visual dos gauges
 function atualizarGauge(circleId, textId, valor, unidade = "%", max = 100) {
   const dash = Math.round((valor / max) * 251);
   document.getElementById(circleId).setAttribute("stroke-dasharray", `${dash} ${251 - dash}`);
   document.getElementById(textId).textContent = valor + unidade;
 }
 
-// ⏳ Bloqueio de atualização durante edição
 let bloquearAtualizacao = false;
 let timeoutAtualizacao = null;
 let segundosRestantes = 0;
@@ -138,7 +132,6 @@ function atualizarContador() {
     `Setpoint a atualizar em: ${segundosRestantes}s`;
 }
 
-// Início do bloqueio ao tocar nos inputs
 ["spTemp", "spHum1", "spHum2", "spLuz"].forEach(id => {
   const input = document.getElementById(id);
   if (input) {
@@ -147,10 +140,8 @@ function atualizarContador() {
   }
 });
 
-// Atualização automática a cada 2s (se permitido)
 setInterval(() => {
   if (!bloquearAtualizacao) atualizar();
 }, 2000);
 
-// Pedido inicial
 atualizar();
