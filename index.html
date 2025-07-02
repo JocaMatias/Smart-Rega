@@ -110,6 +110,27 @@
       font-weight: bold;
     }
 
+    .fab-wifi {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #a855f7;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      transition: background 0.3s;
+    }
+
+    .fab-wifi:hover {
+      background-color: #9333ea;
+    }
+
     @media (max-width: 768px) {
       .grid {
         grid-template-columns: repeat(2, 1fr);
@@ -147,6 +168,8 @@
     <header>Sistema de Rega Automática</header>
 
     <div class="grid">
+      <!-- 4 gauges -->
+      <!-- Temperatura -->
       <div class="gauge">
         <svg width="100" height="100">
           <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
@@ -155,6 +178,8 @@
         </svg>
         <div class="label">Temperatura do Solo</div>
       </div>
+
+      <!-- Humidade 1 -->
       <div class="gauge">
         <svg width="100" height="100">
           <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
@@ -163,6 +188,8 @@
         </svg>
         <div class="label">Humidade 1 (<span id="h1s">--</span>)</div>
       </div>
+
+      <!-- Humidade 2 -->
       <div class="gauge">
         <svg width="100" height="100">
           <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
@@ -171,6 +198,8 @@
         </svg>
         <div class="label">Humidade 2 (<span id="h2s">--</span>)</div>
       </div>
+
+      <!-- Luz -->
       <div class="gauge">
         <svg width="100" height="100">
           <circle cx="50" cy="50" r="40" stroke="#eee" stroke-width="10" fill="none" />
@@ -226,5 +255,8 @@
 
     <div id="contadorSetpoint"></div>
   </div>
+
+  <!-- Botão flutuante de Wi-Fi -->
+  <button class="fab-wifi" title="Gerir Wi-Fi" onclick="location.href='/wifi.html'">📶</button>
 </body>
 </html>
