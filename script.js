@@ -1,37 +1,5 @@
-// 🛜 Verificação do estado do ESP32 ao carregar o site
-async function verificarOnline() {
-  try {
-    const res = await fetch('http://smartrega.local/wifi/atual', { method: 'GET', cache: 'no-store' });
-    if (res.ok) return true;
-  } catch (e) {
-    console.warn("ESP32 está offline.");
-  }
-  return false;
-}
-
-window.addEventListener('DOMContentLoaded', async () => {
-  const online = await verificarOnline();
-  if (!online) {
-    const aviso = document.createElement('div');
-    aviso.innerHTML = `
-      <div style="
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 1rem;
-        border-radius: 8px;
-        text-align: center;
-        margin: 1rem;
-        font-weight: bold;
-        box-shadow: 0 0 6px rgba(0,0,0,0.1);
-      ">
-        ⚠️ Dispositivo offline.<br/>
-        Liga-te à rede <strong>SmartRega_Config</strong> no Wi-Fi.<br/>
-        <a href="http://192.168.4.1" style="color: #b91c1c; text-decoration: underline;">Clica aqui para configurar</a>.
-      </div>
-    `;
-    document.body.prepend(aviso);
-  }
-});
+// 🛜 Verificação do estado do ESP32 via MQTT
+let conectadoMQTT = false;
 
 // Ligação ao broker MQTT via WebSocket seguro (HiveMQ Cloud)
 let client = mqtt.connect('wss://1d5b0c37f4834659a0c05736c16b9504.s1.eu.hivemq.cloud:8884/mqtt', {
@@ -39,8 +7,35 @@ let client = mqtt.connect('wss://1d5b0c37f4834659a0c05736c16b9504.s1.eu.hivemq.c
   password: "Regaautomatica1"
 });
 
+// Verificação se está online após 3 segundos
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if (!conectadoMQTT) {
+      const aviso = document.createElement('div');
+      aviso.innerHTML = `
+        <div style="
+          background: #fee2e2;
+          color: #991b1b;
+          padding: 1rem;
+          border-radius: 8px;
+          text-align: center;
+          margin: 1rem;
+          font-weight: bold;
+          box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        ">
+          ⚠️ Dispositivo offline.<br/>
+          Liga-te à rede <strong>SmartRega_Config</strong> no Wi-Fi.<br/>
+          <a href="http://192.168.4.1" style="color: #b91c1c; text-decoration: underline;">Clica aqui para configurar</a>.
+        </div>
+      `;
+      document.body.prepend(aviso);
+    }
+  }, 3000);
+});
+
 client.on('connect', () => {
   console.log('Ligado ao broker MQTT (HiveMQ Cloud)');
+  conectadoMQTT = true;
   client.subscribe('irhub/estado');
   atualizar(); // dispara o pedido inicial
 });
