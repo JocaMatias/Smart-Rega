@@ -79,6 +79,7 @@ client.on('message', (topic, message) => {
   }
 });
 
+// Funções de controlo manual
 function enviarComando(cmd) {
   client.publish('irhub/comando', cmd);
 }
@@ -90,6 +91,7 @@ function desligar1() { enviarComando('desligar1'); }
 function ligar2() { enviarComando('ligar2'); }
 function desligar2() { enviarComando('desligar2'); }
 
+// Enviar novos setpoints
 function enviarSetpoints() {
   const dados = {
     tempMin: parseFloat(document.getElementById('spTemp').value),
@@ -102,16 +104,19 @@ function enviarSetpoints() {
   iniciarDelayEdicao();
 }
 
+// Pedir estado atual
 function atualizar() {
   client.publish('irhub/comando', 'getEstado');
 }
 
+// Atualização visual dos gauges
 function atualizarGauge(circleId, textId, valor, unidade = "%", max = 100) {
   const dash = Math.round((valor / max) * 251);
   document.getElementById(circleId).setAttribute("stroke-dasharray", `${dash} ${251 - dash}`);
   document.getElementById(textId).textContent = valor + unidade;
 }
 
+// ⏳ Bloqueio de atualização durante edição
 let bloquearAtualizacao = false;
 let timeoutAtualizacao = null;
 let segundosRestantes = 0;
@@ -138,6 +143,7 @@ function atualizarContador() {
     `Setpoint a atualizar em: ${segundosRestantes}s`;
 }
 
+// Início do bloqueio ao tocar nos inputs
 ["spTemp", "spHum1", "spHum2", "spLuz"].forEach(id => {
   const input = document.getElementById(id);
   if (input) {
@@ -146,8 +152,10 @@ function atualizarContador() {
   }
 });
 
+// Atualização automática a cada 2s (se permitido)
 setInterval(() => {
   if (!bloquearAtualizacao) atualizar();
 }, 2000);
 
+// Pedido inicial
 atualizar();
