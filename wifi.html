@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestão de Redes Wi-Fi</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    h2 {
+      margin-top: 30px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+    }
+    .rede-item {
+      background: #fff;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status {
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gestão de Redes Wi-Fi</h1>
+
+  <h2>Rede atual:</h2>
+  <p id="redeAtual">A carregar...</p>
+
+  <h2>Adicionar nova rede</h2>
+  <input type="text" id="novoSSID" placeholder="Nome da rede (SSID)" />
+  <input type="password" id="novaPassword" placeholder="Password" />
+  <button onclick="adicionarRede()">Guardar nova rede</button>
+
+  <h2>Redes guardadas</h2>
+  <div id="listaRedes">A carregar...</div>
+
+  <script>
+    async function carregarRedeAtual() {
+      try {
+        const res = await fetch('/wifi/atual');
+        const data = await res.text();
+        document.getElementById('redeAtual').innerText = data || 'Não ligado';
+      } catch {
+        document.getElementById('redeAtual').innerText = 'Erro ao obter rede atual';
+      }
+    }
+
+    async function carregarRedesGuardadas() {
+      try {
+        const res = await fetch('/wifi/guardadas');
+        const redes = await res.json();
+        const lista = document.getElementById('listaRedes');
+        lista.innerHTML = '';
+
+        redes.forEach(rede => {
+          const div = document.createElement('div');
+          div.className = 'rede-item';
+          div.innerHTML = `
+            <span>${rede.ssid}</span>
+            <button onclick="trocarPara('${rede.ssid}', '${rede.password}')">Ligar</button>
+          `;
+          lista.appendChild(div);
+        });
+      } catch {
+        document.getElementById('listaRedes').innerText = 'Erro ao carregar redes guardadas';
+      }
+    }
+
+    async function adicionarRede() {
+      const ssid = document.getElementById('novoSSID').value;
+      const password = document.getElementById('novaPassword').value;
+
+      if (!ssid || !password) {
+        alert('Preenche todos os campos.');
+        return;
+      }
+
+      const res = await fetch('/wifi/nova', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ssid, password })
+      });
+
+      if (res.ok) {
+        alert('Rede adicionada com sucesso!');
+        carregarRedesGuardadas();
+        document.getElementById('novoSSID').value = '';
+        document.getElementById('novaPassword').value = '';
+      } else {
+        alert('Erro ao adicionar rede.');
+      }
+    }
+
+    async function trocarPara(ssid, password) {
+      if (confirm(`Desejas ligar à rede "${ssid}"?`)) {
+        const res = await fetch('/wifi/trocar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ssid, password })
+        });
+        if (res.ok) {
+          alert('A ligar à nova rede...');
+          setTimeout(() => location.reload(), 5000); // reload após 5s
+        } else {
+          alert('Erro ao trocar de rede.');
+        }
+      }
+    }
+
+    // Inicializar
+    carregarRedeAtual();
+    carregarRedesGuardadas();
+  </script>
+</body>
+</html>
