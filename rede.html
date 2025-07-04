@@ -1,20 +1,31 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <title>Página de Redes</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestão de Redes Wi-Fi</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      text-align: center;
-      margin-top: 100px;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; }
+    input, button { margin: 5px 0; padding: 8px; width: 100%; max-width: 300px; }
+    .rede { background: white; padding: 10px; margin: 10px 0; border-radius: 8px; }
+    .acoes { margin-top: 10px; }
+    .info { color: green; font-weight: bold; margin: 10px 0; }
   </style>
 </head>
 <body>
-  <h1>Página de redes carregada com sucesso!</h1>
-  <p>Se estás a ver esta mensagem, o ESP32 serviu corretamente o ficheiro <code>rede.html</code>.</p>
+  <h1>Redes Wi-Fi</h1>
+
+  <div class="info" id="redeAtual">A obter rede atual...</div>
+
+  <h2>Adicionar nova rede</h2>
+  <input type="text" id="ssid" placeholder="Nome da rede (SSID)">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="adicionarRede()">Adicionar</button>
+
+  <h2>Redes Guardadas</h2>
+  <div id="listaRedes">A carregar...</div>
+
+  <script src="rede.js"></script>
 </body>
 </html>
