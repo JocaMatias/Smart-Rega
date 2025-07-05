@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gestão de Redes Wi-Fi</title>
+  <meta charset="UTF-8">
+  <title>Gestão de Redes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
-    h1 { text-align: center; }
-    input, button { margin: 5px 0; padding: 8px; width: 100%; max-width: 300px; }
-    .rede { background: white; padding: 10px; margin: 10px 0; border-radius: 8px; }
-    .acoes { margin-top: 10px; }
-    .info { color: green; font-weight: bold; margin: 10px 0; }
+    body { font-family: sans-serif; padding: 20px; }
+    .btn { margin: 5px; padding: 5px 10px; }
+    .rede { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
   </style>
 </head>
 <body>
-  <h1>Redes Wi-Fi</h1>
+  <h1>Gestão de Redes Wi-Fi</h1>
 
-  <div class="info" id="redeAtual">A obter rede atual...</div>
+  <p id="redeAtual">A obter rede atual...</p>
 
-  <h2>Adicionar nova rede</h2>
-  <input type="text" id="ssid" placeholder="Nome da rede (SSID)">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="adicionarRede()">Adicionar</button>
+  <h3>Adicionar nova rede</h3>
+  <input id="ssid" placeholder="SSID"><br>
+  <input id="pass" placeholder="Password" type="password"><br>
+  <button onclick="adicionarRede()" class="btn">Adicionar</button>
 
-  <h2>Redes Guardadas</h2>
+  <h3>Redes guardadas</h3>
   <div id="listaRedes">A carregar...</div>
 
   <script src="rede.js"></script>
