@@ -16,7 +16,7 @@ function carregarRedes() {
       const lista = document.getElementById('listaRedes');
       lista.innerHTML = '';
 
-      if (!redes || redes.length === 0) {
+      if (redes.length === 0) {
         lista.textContent = 'Nenhuma rede guardada.';
         return;
       }
@@ -31,17 +31,14 @@ function carregarRedes() {
         `;
         lista.appendChild(div);
       });
-    })
-    .catch(() => {
-      document.getElementById('listaRedes').textContent = 'Erro ao carregar redes';
     });
 }
 
 function adicionarRede() {
-  const ssid = document.getElementById('ssid').value;
+  const ssid = document.getElementById('ssid').value.trim();
   const pass = document.getElementById('pass').value;
 
-  if (!ssid) return alert('SSID obrigatório');
+  if (!ssid) return alert('SSID não pode estar vazio.');
 
   fetch('/rede/adicionar', {
     method: 'POST',
@@ -49,13 +46,13 @@ function adicionarRede() {
     headers: { 'Content-Type': 'application/json' }
   })
   .then(r => r.text())
-  .then(txt => {
-    alert(txt);
+  .then(res => {
+    alert(res);
     carregarRedes();
+    atualizarRedeAtual();
     document.getElementById('ssid').value = '';
     document.getElementById('pass').value = '';
-  })
-  .catch(() => alert('Erro ao adicionar rede'));
+  });
 }
 
 function trocar(ssid) {
@@ -63,8 +60,7 @@ function trocar(ssid) {
     method: 'POST',
     body: JSON.stringify({ ssid }),
     headers: { 'Content-Type': 'application/json' }
-  }).then(() => alert('A mudar de rede...'))
-    .catch(() => alert('Erro ao trocar de rede'));
+  });
 }
 
 function remover(ssid) {
@@ -72,8 +68,7 @@ function remover(ssid) {
     method: 'POST',
     body: JSON.stringify({ ssid }),
     headers: { 'Content-Type': 'application/json' }
-  }).then(() => carregarRedes())
-    .catch(() => alert('Erro ao remover rede'));
+  }).then(() => carregarRedes());
 }
 
 atualizarRedeAtual();
