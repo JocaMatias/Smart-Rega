@@ -1,6 +1,6 @@
 function atualizarRedeAtual() {
   fetch('/rede/atual')
-    .then(r => r.json())
+    .then(r => r.json()) 
     .then(data => {
       document.getElementById('redeAtual').textContent = 'Ligado a: ' + data.ssid;
     })
